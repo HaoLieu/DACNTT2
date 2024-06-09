@@ -12,8 +12,23 @@ const foodSchema = new mongoose.Schema({
   img: {
     type: String,
     require: true
+  },
+  qty: {
+    type: Number,
+    required: true
+  },
+  isHidden: {
+    type: Boolean,
+    required: true
+  },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'FoodCategory',
+    required: true
   }
-}, {collection: "food"});
+}, {
+  collection: 'foods'
+});
 
 const Food = mongoose.model('Food', foodSchema);
 module.exports = Food;
