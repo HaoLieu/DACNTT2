@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require('cors');
 const app = express();
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express"); 
@@ -12,6 +13,10 @@ mongoose.connect(mongoURI || "mongodb+srv://haolieu:Haolieu%40030401@foodstall.u
     console.log("Connection opened!");
   })
   .catch(error => console.log(error))
+
+app.use(cors({
+  origin: 'https://dacntt2.onrender.com/' // Adjust this to match the domain of your client application
+}));
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
