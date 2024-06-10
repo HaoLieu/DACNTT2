@@ -6,7 +6,8 @@ const swaggerUi = require("swagger-ui-express");
 const Food = require('./models/food'); 
 const FoodCategory = require("./models/foodCategory");
 
-mongoose.connect("mongodb://127.0.0.1/Foodstall")
+const mongoURI = process.env.MONGO_URI;
+mongoose.connect(mongoURI || "mongodb+srv://haolieu:Haolieu%40030401@foodstall.unhk5wu.mongodb.net/FoodStall")
   .then(() => {
     console.log("Connection opened!");
   })
