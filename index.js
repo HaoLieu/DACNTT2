@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require('cors');
@@ -8,7 +9,7 @@ const Food = require('./models/food');
 const FoodCategory = require("./models/foodCategory");
 
 const mongoURI = process.env.MONGO_URI;
-mongoose.connect(mongoURI || "mongodb+srv://haolieu:Haolieu%40030401@foodstall.unhk5wu.mongodb.net/FoodStall")
+mongoose.connect(mongoURI)
   .then(() => {
     console.log("Connection opened!");
   })
