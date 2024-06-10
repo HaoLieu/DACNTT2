@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express"); 
 const Food = require('./models/food'); 
 const FoodCategory = require("./models/foodCategory");
 
@@ -11,9 +13,52 @@ mongoose.connect("mongodb://127.0.0.1:27017/Foodstall")
   .catch(error => console.log(error))
 
 app.use(express.urlencoded({extended: true}));
+app.use(express.json());
+
 
 // Define the GET API
-app.get('/foods', async (req, res) => {
+/**
+ * @swagger
+ *  components:
+ *    schema: 
+ *      Food:
+ *        type: object
+ *        properties: 
+ *          name:
+ *             type: string
+ *          price: 
+ *             type: integer
+ *          img:
+ *             type: string
+ *          qty:
+ *             type: integer
+ *          isHidden: 
+ *             type: boolean
+ *          category:
+ *            type: string
+ */
+
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foods/getAllFoods:
+ *  get:
+ *    summary: This api is used to get all foods
+ *    description:  This api is used to get all foods
+ *    tags: [Foods]
+ *    responses: 
+ *      200: 
+ *        description: to test get method
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items: 
+ *                $ref: '#components/schema/Food'
+ */
+app.get('/api/foods/getAllFoods', async (req, res) => {
   try {
       const foods = await Food.find();
       res.json(foods);
@@ -22,7 +67,35 @@ app.get('/foods', async (req, res) => {
   }
 });
 
-app.get('/foods/:id', async (req, res) => {
+
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foods/getFoodById/{id}:
+ *  get:
+ *    summary: This api is used to get all foods
+ *    description:  This api is used to get all foods
+ *    tags: [Foods]
+ *    parameters: 
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        description: String Id
+ *        schema: 
+ *          type: string
+ *    responses: 
+ *      200: 
+ *        description: to test get method
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items: 
+ *                $ref: '#components/schema/Food'
+ */
+app.get('/api/foods/getFoodById/:id', async (req, res) => {
   try {
     const {id} = req.params;
     const food = await Food.findById({_id: id});
@@ -32,41 +105,94 @@ app.get('/foods/:id', async (req, res) => {
   }
 });
 
-app.post('/foods/create-food', async (req, res) => {
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foods/createFood:
+ *  post:
+ *    summary: This api is used to add food
+ *    description:  This api is used to add food
+ *    tags: [Foods]
+ *    requestBody: 
+ *      required: true
+ *      content: 
+ *        application/json:
+ *          schema: 
+ *            $ref: '#components/schema/Food'
+ *    responses: 
+ *      200: 
+ *        description: Success 
+ */
+app.post('/api/foods/createFood', async (req, res) => {
   const { name, price, img, qty, isHidden, category } = req.body;
 
-    if (!name || price === undefined || !img || qty === undefined || isHidden === undefined || !category) {
-        return res.status(400).json({ message: "All fields are required, including the category ID." });
-    }
+  if (!name || price === undefined || !img || qty === undefined || isHidden === undefined || !category) {
+      return res.status(400).json({ message: "All fields are required, including the category ID." });
+  }
 
-    try {
-        const categoryExists = await FoodCategory.findById(category);
-        if (!categoryExists) {
-            return res.status(404).json({ message: "Category not found. Please provide a valid category ID." });
-        }
+  try {
+      const categoryExists = await FoodCategory.findById(category);
+      if (!categoryExists) {
+          return res.status(404).json({ message: "Category not found. Please provide a valid category ID." });
+      }
 
-        const newFood = new Food({
-            name,
-            price,
-            img,
-            qty,
-            isHidden,
-            category
-        });
+      const newFood = new Food({
+          name,
+          price,
+          img,
+          qty,
+          isHidden,
+          category
+      });
 
-        await newFood.save();
+      await newFood.save();
 
-        res.status(201).json({
-            message: "Food created successfully",
-            food: newFood
-        });
-    } catch (error) {
-        console.error('Failed to create food:', error);
-        res.status(500).json({ message: "Failed to create food", error: error.message });
-    }
+      res.status(201).json({
+          message: "Food created successfully",
+          food: newFood
+      });
+  } catch (error) {
+      console.error('Failed to create food:', error);
+      res.status(500).json({ message: "Failed to create food", error: error.message });
+  }
 });
 
-app.put('/foods/:id', async (req, res) => {
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foods/updateFood/{id}:
+ *  put:
+ *    summary: This api is used to get all foods
+ *    description:  This api is used to get all foods
+ *    tags: [Foods]
+ *    parameters: 
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        description: String Id
+ *        schema: 
+ *          type: string
+ *    requestBody: 
+ *      required: true
+ *      content: 
+ *        application/json:
+ *          schema: 
+ *            $ref: '#components/schema/Food'
+ *    responses: 
+ *      200: 
+ *        description: to test get method
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items: 
+ *                $ref: '#components/schema/Food'
+ */
+app.put('/api/foods/updateFood/:id', async (req, res) => {
   const { id } = req.params;
   const { name, price, img, qty, isHidden, category } = req.body;
 
@@ -94,7 +220,28 @@ app.put('/foods/:id', async (req, res) => {
   }
 });
 
-app.delete('/foods/:id', async (req, res) => {
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foods/deleteFood/{id}:
+ *  delete:
+ *    summary: This api is delete food
+ *    description:  This api is used to delete food
+ *    tags: [Foods]
+ *    parameters: 
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        description: String Id
+ *        schema: 
+ *          type: string
+ *    responses: 
+ *      200: 
+ *        description: deleted
+ */
+app.delete('/api/foods/deleteFood/:id', async (req, res) => {
   try {
     const {id} = req.params;
     const deletedFood = await Food.findByIdAndDelete(id, {new: true});
@@ -105,7 +252,7 @@ app.delete('/foods/:id', async (req, res) => {
 })
 
 //Category API
-app.get('/food-categories', async (req, res) => {
+app.get('/api/food-categories', async (req, res) => {
   try {
     const foodCategories = await FoodCategory.find();
     res.json(foodCategories);
@@ -114,7 +261,7 @@ app.get('/food-categories', async (req, res) => {
   }
 })
 
-app.get('/food-categories/:id', async (req, res) => {
+app.get('/api/food-categories/:id', async (req, res) => {
   try {
     const {id} = req.params;
     const category = await FoodCategory.findById({_id: id});
@@ -124,7 +271,7 @@ app.get('/food-categories/:id', async (req, res) => {
   }
 })
 
-app.post('/food-categories/create-category', async (req, res) => {
+app.post('/api/food-categories/create-category', async (req, res) => {
   try {
     const {categoryName, categoryDescription, isHidden} = req.body;
     if (!categoryName || !categoryDescription || isHidden === undefined) {
@@ -148,7 +295,7 @@ app.post('/food-categories/create-category', async (req, res) => {
   }
 })
 
-app.put('/food-categories/:id', async (req, res) => {
+app.put('/api/food-categories/:id', async (req, res) => {
   const { id } = req.params;
   const { categoryName, categoryDescription, isHidden } = req.body;
 
@@ -177,7 +324,7 @@ app.put('/food-categories/:id', async (req, res) => {
   }
 });
 
-app.delete('/food-categories/:id', async (req, res) => {
+app.delete('/api/food-categories/:id', async (req, res) => {
   try {
     const {id} = req.params;
     const deletedCategory = await FoodCategory.findByIdAndDelete(id, {new: true});
@@ -190,6 +337,29 @@ app.delete('/food-categories/:id', async (req, res) => {
     res.status(500).json({message: "Error deleting category", error: error.message})
   }
 })
+
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Foodstall management APIs",
+      version: "1.0.0"
+    },
+    servers: [
+      {
+          url: 'http://localhost:8080/'
+      }
+    ]
+  },
+  apis: ['./index.js']
+}
+
+const swaggerSpecs = swaggerJsdoc(options);
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpecs)
+)
 
 app.listen(8080, () => {
   console.log("listening on port 8080");
