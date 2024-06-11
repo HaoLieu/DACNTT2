@@ -9,7 +9,7 @@ const Food = require('./models/food');
 const FoodCategory = require("./models/foodCategory");
 
 const mongoURI = process.env.MONGO_URI;
-mongoose.connect(mongoURI)
+mongoose.connect(mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall")
   .then(() => {
     console.log("Connection opened!");
   })
@@ -43,6 +43,15 @@ app.use(express.json());
  *             type: boolean
  *          category:
  *            type: string
+ *      Category: 
+ *        type: object
+ *        properties:
+ *          categoryName:
+ *            type: string
+ *          categoryDescription:
+ *             type: string
+ *          isHidden: 
+ *             type: boolean
  */
 
 /**
@@ -259,7 +268,27 @@ app.delete('/api/foods/deleteFood/:id', async (req, res) => {
 })
 
 //Category API
-app.get('/api/food-categories', async (req, res) => {
+/**
+ * @swagger
+ * tags: 
+ *  name: Categories
+ *  description: Foods management API
+ * /api/foodCategories/getAllCategories:
+ *  get:
+ *    summary: This api is used to get all categories
+ *    description:  This api is used to get all categories
+ *    tags: [Categories]
+ *    responses: 
+ *      200: 
+ *        description: to test get method
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items: 
+ *                $ref: '#components/schema/Category'
+ */
+app.get('/api/foodCategories/getAllCategories', async (req, res) => {
   try {
     const foodCategories = await FoodCategory.find();
     res.json(foodCategories);
@@ -268,7 +297,34 @@ app.get('/api/food-categories', async (req, res) => {
   }
 })
 
-app.get('/api/food-categories/:id', async (req, res) => {
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foodCategories/getCategoryById/{id}:
+ *  get:
+ *    summary: This api is used to get category by id
+ *    description:  This api is used to get category by id
+ *    tags: [Categories]
+ *    parameters: 
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        description: String Id
+ *        schema: 
+ *          type: string
+ *    responses: 
+ *      200: 
+ *        description: to test get method
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items: 
+ *                $ref: '#components/schema/Category'
+ */
+app.get('/api/foodCategories/getCategoryById/:id', async (req, res) => {
   try {
     const {id} = req.params;
     const category = await FoodCategory.findById({_id: id});
@@ -278,7 +334,27 @@ app.get('/api/food-categories/:id', async (req, res) => {
   }
 })
 
-app.post('/api/food-categories/create-category', async (req, res) => {
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foodCategories/createCategory:
+ *  post:
+ *    summary: This api is used to add category
+ *    description:  This api is used to add category
+ *    tags: [Categories]
+ *    requestBody: 
+ *      required: true
+ *      content: 
+ *        application/json:
+ *          schema: 
+ *            $ref: '#components/schema/Category'
+ *    responses: 
+ *      200: 
+ *        description: Success 
+ */
+app.post('/api/foodCategories/createCategory', async (req, res) => {
   try {
     const {categoryName, categoryDescription, isHidden} = req.body;
     if (!categoryName || !categoryDescription || isHidden === undefined) {
@@ -302,7 +378,40 @@ app.post('/api/food-categories/create-category', async (req, res) => {
   }
 })
 
-app.put('/api/food-categories/:id', async (req, res) => {
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foodCategories/updateCategory/{id}:
+ *  put:
+ *    summary: This api is used to get update category
+ *    description:  This api is used to get update category
+ *    tags: [Categories]
+ *    parameters: 
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        description: String Id
+ *        schema: 
+ *          type: string
+ *    requestBody: 
+ *      required: true
+ *      content: 
+ *        application/json:
+ *          schema: 
+ *            $ref: '#components/schema/Category'
+ *    responses: 
+ *      200: 
+ *        description: to test get method
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items: 
+ *                $ref: '#components/schema/Category'
+ */
+app.put('/api/foodCategories/updateCategory/:id', async (req, res) => {
   const { id } = req.params;
   const { categoryName, categoryDescription, isHidden } = req.body;
 
@@ -331,7 +440,28 @@ app.put('/api/food-categories/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/food-categories/:id', async (req, res) => {
+/**
+ * @swagger
+ * tags: 
+ *  name: Foods
+ *  description: Foods management API
+ * /api/foodCategories/deleteCategory/{id}:
+ *  delete:
+ *    summary: This api is delete category 
+ *    description:  This api is used to delete category
+ *    tags: [Categories]
+ *    parameters: 
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        description: String Id
+ *        schema: 
+ *          type: string
+ *    responses: 
+ *      200: 
+ *        description: deleted
+ */
+app.delete('/api/foodCategories/deleteCategory/:id', async (req, res) => {
   try {
     const {id} = req.params;
     const deletedCategory = await FoodCategory.findByIdAndDelete(id, {new: true});
@@ -354,6 +484,7 @@ const options = {
     },
     servers: [
       {
+          // url: 'http://localhost:8080/'
           url: 'https://dacntt2.onrender.com/'
       }
     ]
