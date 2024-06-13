@@ -10,8 +10,8 @@ const foodSchema = new mongoose.Schema({
     required: true
   },
   img: {
-    type: String,
-    require: true
+    url: String,
+    filename: String
   },
   qty: {
     type: Number,

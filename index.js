@@ -3,10 +3,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require('cors');
 const app = express();
+const multer = require('multer');
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express"); 
 const Food = require('./models/food'); 
 const FoodCategory = require("./models/foodCategory");
+const {storage} = require('./cloudinary');
+
+const upload = multer ({storage});
 
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall")
@@ -141,9 +145,8 @@ app.get('/api/foods/getFoodById/:id', async (req, res) => {
  *      200: 
  *        description: Success 
  */
-app.post('/api/foods/createFood', async (req, res) => {
+app.post('/api/foods/createFood',  upload.single('image'), async (req, res) => {
   const { name, price, img, qty, isHidden, category } = req.body;
-
   if (!name || price === undefined || !img || qty === undefined || isHidden === undefined || !category) {
       return res.status(400).json({ message: "All fields are required, including the category ID." });
   }
@@ -160,7 +163,11 @@ app.post('/api/foods/createFood', async (req, res) => {
           img,
           qty,
           isHidden,
-          category
+          category,
+          img: {
+            url: req.file.path,  // Adjust depending on your file storage setup
+            filename: req.file.filename
+          }
       });
 
       await newFood.save();
@@ -475,6 +482,75 @@ app.delete('/api/foodCategories/deleteCategory/:id', async (req, res) => {
   }
 })
 
+// Upload
+/**
+ * @openapi
+ * /api/UploadFile:
+ *   post:
+ *     summary: Uploads a file
+ *     description: This API uploads a single file to the server.
+ *     tags: [File upload]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *             required:
+ *               - image
+ *     responses:
+ *       200:
+ *         description: File uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 file:
+ *                   type: object
+ *                   properties:
+ *                     fieldname:
+ *                       type: string
+ *                       description: The field name specified in the form.
+ *                     originalname:
+ *                       type: string
+ *                       description: The original filename in the client's filesystem.
+ *                     mimetype:
+ *                       type: string
+ *                       description: The MIME type of the file.
+ *                     size:
+ *                       type: integer
+ *                       description: The size of the file in bytes.
+ *                     path:
+ *                       type: string
+ *                       description: The URL where the uploaded file is accessible.
+ *               required:
+ *                 - file
+ *       400:
+ *         description: Error message for bad request
+ */
+app.post('/api/UploadFile', upload.single('image'), (req, res) => {
+  if (req.file) {
+    console.log(req.body, req.file);
+    res.status(200).json({
+      file: {
+        fieldname: req.file.fieldname,
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        destination: req.file.destination,
+        filename: req.file.filename,
+        path: req.file.path
+      },
+    });
+  } else {
+    res.status(400).send('No file uploaded.');
+  }
+});
+
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -484,8 +560,8 @@ const options = {
     },
     servers: [
       {
-          // url: 'http://localhost:8080/'
-          url: 'https://dacntt2.onrender.com/'
+          url: 'http://localhost:8080/'
+          // url: 'https://dacntt2.onrender.com/'
       }
     ]
   },
