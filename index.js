@@ -10,13 +10,13 @@ const {storage} = require('./cloudinary');
 const passport = require('passport');
 const LocalStratey = require('passport-local');
 const session = require('express-session');
-const mongodbStore = require('connect-mongo')(session);
 const upload = multer ({storage});
 const User = require('./models/user');
 const foodRoutes = require('./routes/food');
 const categoriesRoutes = require('./routes/categories');
 const userRoutes = require('./routes/users');
 const menuRoutes = require('./routes/menus');
+const MongoStore = require('connect-mongo');
 
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall")
@@ -41,11 +41,13 @@ app.use(cors({
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
-const store = new mongodbStore({
-  url: mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall",
-  secret: 'thisisarandomnormalsecret',
-  touchAfter: 24 * 3600
-})
+const store = MongoStore.create({
+  mongoUrl: mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall",
+  touchAfter: 24 * 60 * 60,
+  crypto: {
+      secret: 'thisshouldbeabettersecret!'
+  }
+});
 
 store.on("error", (e) => {
   console.log("Session error: ", e);
