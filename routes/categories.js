@@ -107,7 +107,7 @@ router.get('/getAllCategories', async (req, res) => {
    *      200: 
    *        description: Success 
    */
-  router.post('/createCategory', isLoggedIn, async (req, res) => {
+  router.post('/createCategory',  async (req, res) => {
     try {
       const {categoryName, url, isHidden, createdDate} = req.body;
       if (!categoryName || !url || isHidden === undefined || !createdDate) {
@@ -165,7 +165,7 @@ router.get('/getAllCategories', async (req, res) => {
    *              items: 
    *                $ref: '#components/schema/Category'
    */
-  router.put('/updateCategory/:id', isLoggedIn, async (req, res) => {
+  router.put('/updateCategory/:id',  async (req, res) => {
     const { id } = req.params;
     const { categoryName, url, isHidden, createdDate } = req.body;
   
@@ -215,7 +215,7 @@ router.get('/getAllCategories', async (req, res) => {
    *      200: 
    *        description: deleted
    */
-  router.delete('/deleteCategory/:id', isLoggedIn, async (req, res) => {
+  router.delete('/deleteCategory/:id',  async (req, res) => {
     try {
       const {id} = req.params;
       const deletedCategory = await FoodCategory.findByIdAndDelete(id, {new: true});

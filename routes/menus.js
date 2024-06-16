@@ -109,7 +109,7 @@ router.get('/getAllMenus', async (req, res) => {
    *      200: 
    *        description: Success 
    */
-  router.post('/createMenu', isLoggedIn, async (req, res) => {
+  router.post('/createMenu',  async (req, res) => {
     try {
       const {menuName, url, isHidden, createdDate, routeName} = req.body;
       if (!menuName || !url || isHidden === undefined || !createdDate || !routeName) {
@@ -168,7 +168,7 @@ router.get('/getAllMenus', async (req, res) => {
    *              items: 
    *                $ref: '#components/schema/Menu'
    */
-  router.put('/updateMenu/:id', isLoggedIn, async (req, res) => {
+  router.put('/updateMenu/:id',  async (req, res) => {
     const { id } = req.params;
     const { menuName, url, isHidden, createdDate, routeName } = req.body;
   
@@ -218,7 +218,7 @@ router.get('/getAllMenus', async (req, res) => {
    *      200: 
    *        description: deleted
    */
-  router.delete('/deleteMenu/:id', isLoggedIn, async (req, res) => {
+  router.delete('/deleteMenu/:id',  async (req, res) => {
     try {
       const {id} = req.params;
       const deletedMenu = await FoodMenu.findByIdAndDelete(id, {new: true});
