@@ -146,9 +146,9 @@ app.get('/api/foods/getFoodById/:id', async (req, res) => {
  *        description: Success 
  */
 app.post('/api/foods/createFood',  upload.single('image'), async (req, res) => {
-  const { name, price, img, qty, isHidden, category } = req.body;
-  if (!name || price === undefined || !img || qty === undefined || isHidden === undefined || !category) {
-      return res.status(400).json({ message: "All fields are required, including the category ID." });
+  const { name, price, qty, isHidden, category } = req.body; // Removed `img` from destructuring
+  if (!name || price === undefined || qty === undefined || isHidden === undefined || !category || !req.file) {
+      return res.status(400).json({ message: "All fields are required, including the image and category ID." });
   }
 
   try {
@@ -160,7 +160,6 @@ app.post('/api/foods/createFood',  upload.single('image'), async (req, res) => {
       const newFood = new Food({
           name,
           price,
-          img,
           qty,
           isHidden,
           category,
@@ -181,6 +180,7 @@ app.post('/api/foods/createFood',  upload.single('image'), async (req, res) => {
       res.status(500).json({ message: "Failed to create food", error: error.message });
   }
 });
+
 
 /**
  * @swagger
@@ -215,19 +215,27 @@ app.post('/api/foods/createFood',  upload.single('image'), async (req, res) => {
  *              items: 
  *                $ref: '#components/schema/Food'
  */
-app.put('/api/foods/updateFood/:id', async (req, res) => {
+app.put('/api/foods/updateFood/:id', upload.single('image'), async (req, res) => {
   const { id } = req.params;
-  const { name, price, img, qty, isHidden, category } = req.body;
+  const updates = req.body;
 
-  if (!name && price === undefined && !img && qty === undefined && isHidden === undefined && !category) {
+  if (Object.keys(updates).length === 0 && !req.file) {
       return res.status(400).json({ message: "Please provide data to update." });
+  }
+
+  // Add file details to the update if an image has been uploaded
+  if (req.file) {
+      updates.img = {
+          url: req.file.path,
+          filename: req.file.filename
+      };
   }
 
   try {
       const updatedFood = await Food.findByIdAndUpdate(
           id,
-          { $set: { name, price, img, qty, isHidden, category } },
-          { new: true, runValidators: true } 
+          { $set: updates },
+          { new: true, runValidators: true }
       );
 
       if (!updatedFood) {
@@ -242,6 +250,7 @@ app.put('/api/foods/updateFood/:id', async (req, res) => {
       res.status(500).json({ message: "Error updating food", error: error.message });
   }
 });
+
 
 /**
  * @swagger
@@ -560,7 +569,7 @@ const options = {
     },
     servers: [
       {
-          // url: 'http://localhost:8080/'
+          //url: 'http://localhost:8080/'
           url: 'https://dacntt2.onrender.com/'
       }
     ]
