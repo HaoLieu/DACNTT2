@@ -145,8 +145,8 @@ const options = {
     },
     servers: [
       {
-          url: 'http://localhost:8080/'
-          //url: 'https://dacntt2.onrender.com/'
+          //url: 'http://localhost:8080/'
+          url: 'https://dacntt2.onrender.com/'
       }
     ]
   },
