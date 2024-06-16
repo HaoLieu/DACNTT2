@@ -4,6 +4,7 @@ const multer = require('multer');
 const {storage} = require('../cloudinary');
 const Food = require('../models/food'); 
 const FoodCategory = require("../models/foodCategory");
+const {isLoggedIn} = require('../middleware');
 
 const upload = multer ({storage});
 
@@ -123,7 +124,7 @@ router.get('/getAllFoods', async (req, res) => {
    *      200: 
    *        description: Success 
    */
-  router.post('/createFood',  upload.single('img'), async (req, res) => {
+  router.post('/createFood', isLoggedIn,  upload.single('img'), async (req, res) => {
     const { name, price, isHidden, category } = req.body; // Removed `img` from destructuring
     if (!name || price === undefined || isHidden === undefined || !category || !req.file) {
         return res.status(400).json({ message: "All fields are required, including the image and category ID." });
@@ -184,7 +185,7 @@ router.get('/getAllFoods', async (req, res) => {
    *              items: 
    *                $ref: '#components/schema/Food'
    */
-  router.put('/updateFood/:id', upload.single('img'), async (req, res) => {
+  router.put('/updateFood/:id', isLoggedIn, upload.single('img'), async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
   
@@ -242,7 +243,7 @@ router.get('/getAllFoods', async (req, res) => {
    *      200: 
    *        description: deleted
    */
-  router.delete('/deleteFood/:id', async (req, res) => {
+  router.delete('/deleteFood/:id', isLoggedIn, async (req, res) => {
     try {
       const {id} = req.params;
       const deletedFood = await Food.findByIdAndDelete(id, {new: true});

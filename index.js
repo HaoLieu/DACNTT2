@@ -6,12 +6,16 @@ const app = express();
 const multer = require('multer');
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express"); 
-const FoodCategory = require("./models/foodCategory");
 const {storage} = require('./cloudinary');
-
-const food = require('./routes/food');
-const categories = require('./routes/categories');
+const passport = require('passport');
+const LocalStratey = require('passport-local');
+const session = require('express-session');
 const upload = multer ({storage});
+const User = require('./models/user');
+const foodRoutes = require('./routes/food');
+const categoriesRoutes = require('./routes/categories');
+const userRoutes = require('./routes/users');
+const menuRoutes = require('./routes/menus');
 
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall")
@@ -32,13 +36,35 @@ app.use(cors({
   }
 }));
 
+
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
+const sessionConfig = {
+  secret: 'thisisarandomnormalsecret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    expires: Date.now() + 1000 * 60 * 60 * 24 *7,
+    maxAge: 1000 * 60 * 60 * 24 *7
+  }
+}
 
+app.use(session(sessionConfig))
 
-app.use("/api/foods", food)
-app.use("/api/foodCategories", categories);
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStratey({
+  usernameField: 'email'
+}, User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+app.use("/api", userRoutes);
+app.use("/api/foods", foodRoutes);
+app.use("/api/foodCategories", categoriesRoutes);
+app.use("/api/foodMenus", menuRoutes);
 
 
 // Upload
@@ -93,7 +119,7 @@ app.use("/api/foodCategories", categories);
  */
 app.post('/api/UploadFile', upload.single('image'), (req, res) => {
   if (req.file) {
-    console.log(req.body, req.file);
+    console.log(req.file);
     res.status(200).json({
       file: {
         fieldname: req.file.fieldname,
@@ -119,12 +145,12 @@ const options = {
     },
     servers: [
       {
-          //url: 'http://localhost:8080/'
-          url: 'https://dacntt2.onrender.com/'
+          url: 'http://localhost:8080/'
+          //url: 'https://dacntt2.onrender.com/'
       }
     ]
   },
-  apis: ['./index.js', './routes/food.js', './routes/categories.js']
+  apis: ['./index.js', './routes/food.js', './routes/categories.js', './routes/users.js', './routes/menus.js']
 }
 
 const swaggerSpecs = swaggerJsdoc(options);

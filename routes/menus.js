@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const FoodCategory = require("../models/foodCategory");
+const FoodMenu = require("../models/foodMenu");
 const {isLoggedIn} = require('../middleware');
 
 /**
  * @swagger
  *  components:
  *    schema: 
- *      Category: 
+ *      Menu: 
  *        type: object
  *        properties:
- *          categoryName:
+ *          menuName:
  *            type: string
  *          url:
  *             type: string
@@ -18,19 +18,21 @@ const {isLoggedIn} = require('../middleware');
  *             type: boolean
  *          createdDate:
  *             type: string
+ *          routeName:
+ *             type: string
  */
 
-//Category API
+//Menu API
 /**
  * @swagger
  * tags: 
- *  name: Categories
+ *  name: Menus
  *  description: Foods management API
- * /api/foodCategories/getAllCategories:
+ * /api/foodMenus/getAllMenus:
  *  get:
- *    summary: This api is used to get all categories
- *    description:  This api is used to get all categories
- *    tags: [Categories]
+ *    summary: This api is used to get all Menus
+ *    description:  This api is used to get all Menus
+ *    tags: [Menus]
  *    responses: 
  *      200: 
  *        description: to test get method
@@ -39,12 +41,12 @@ const {isLoggedIn} = require('../middleware');
  *            schema:
  *              type: array
  *              items: 
- *                $ref: '#components/schema/Category'
+ *                $ref: '#components/schema/Menu'
  */
-router.get('/getAllCategories', async (req, res) => {
+router.get('/getAllMenus', async (req, res) => {
     try {
-      const foodCategories = await FoodCategory.find();
-      res.json(foodCategories);
+      const foodMenus = await FoodMenu.find();
+      res.json(foodMenus);
     } catch (error) {
       console.log(error);
     }
@@ -55,11 +57,11 @@ router.get('/getAllCategories', async (req, res) => {
    * tags: 
    *  name: Foods
    *  description: Foods management API
-   * /api/foodCategories/getCategoryById/{id}:
+   * /api/foodMenus/getMenuById/{id}:
    *  get:
-   *    summary: This api is used to get category by id
-   *    description:  This api is used to get category by id
-   *    tags: [Categories]
+   *    summary: This api is used to get Menu by id
+   *    description:  This api is used to get Menu by id
+   *    tags: [Menus]
    *    parameters: 
    *      - in: path
    *        name: id
@@ -75,13 +77,13 @@ router.get('/getAllCategories', async (req, res) => {
    *            schema:
    *              type: array
    *              items: 
-   *                $ref: '#components/schema/Category'
+   *                $ref: '#components/schema/Menu'
    */
-  router.get('/getCategoryById/:id', async (req, res) => {
+  router.get('/getMenuById/:id', async (req, res) => {
     try {
       const {id} = req.params;
-      const category = await FoodCategory.findById({_id: id});
-      res.json(category);
+      const menu = await FoodMenu.findById({_id: id});
+      res.json(menu);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -92,43 +94,44 @@ router.get('/getAllCategories', async (req, res) => {
    * tags: 
    *  name: Foods
    *  description: Foods management API
-   * /api/foodCategories/createCategory:
+   * /api/foodMenus/createMenu:
    *  post:
-   *    summary: This api is used to add category
-   *    description:  This api is used to add category
-   *    tags: [Categories]
+   *    summary: This api is used to add Menu
+   *    description:  This api is used to add Menu
+   *    tags: [Menus]
    *    requestBody: 
    *      required: true
    *      content: 
    *        application/json:
    *          schema: 
-   *            $ref: '#components/schema/Category'
+   *            $ref: '#components/schema/Menu'
    *    responses: 
    *      200: 
    *        description: Success 
    */
-  router.post('/createCategory', isLoggedIn, async (req, res) => {
+  router.post('/createMenu', isLoggedIn, async (req, res) => {
     try {
-      const {categoryName, url, isHidden, createdDate} = req.body;
-      if (!categoryName || !url || isHidden === undefined || !createdDate) {
+      const {menuName, url, isHidden, createdDate, routeName} = req.body;
+      if (!menuName || !url || isHidden === undefined || !createdDate || !routeName) {
         return res.status(400).json({ message: "All fields are required." });
       }
-      const newCategory = new FoodCategory({
-        categoryName,
+      const newMenu = new FoodMenu({
+        menuName,
         url,
         isHidden,
-        createdDate
+        createdDate,
+        routeName
       });
   
-      await newCategory.save();
+      await newMenu.save();
   
       res.status(201).json({
-          message: "Category created successfully",
-          category: newCategory
+          message: "Menu created successfully",
+          menu: newMenu
       });
     } catch (error) {
-      console.error('Failed to create category:', error);
-      res.status(500).json({ message: "Failed to create category", error: error.message });
+      console.error('Failed to create menu:', error);
+      res.status(500).json({ message: "Failed to create menu", error: error.message });
     }
   })
   
@@ -137,11 +140,11 @@ router.get('/getAllCategories', async (req, res) => {
    * tags: 
    *  name: Foods
    *  description: Foods management API
-   * /api/foodCategories/updateCategory/{id}:
+   * /api/foodMenus/updateMenu/{id}:
    *  put:
-   *    summary: This api is used to get update category
-   *    description:  This api is used to get update category
-   *    tags: [Categories]
+   *    summary: This api is used to get update Menu
+   *    description:  This api is used to get update Menu
+   *    tags: [Menus]
    *    parameters: 
    *      - in: path
    *        name: id
@@ -154,7 +157,7 @@ router.get('/getAllCategories', async (req, res) => {
    *      content: 
    *        application/json:
    *          schema: 
-   *            $ref: '#components/schema/Category'
+   *            $ref: '#components/schema/Menu'
    *    responses: 
    *      200: 
    *        description: to test get method
@@ -163,34 +166,34 @@ router.get('/getAllCategories', async (req, res) => {
    *            schema:
    *              type: array
    *              items: 
-   *                $ref: '#components/schema/Category'
+   *                $ref: '#components/schema/Menu'
    */
-  router.put('/updateCategory/:id', isLoggedIn, async (req, res) => {
+  router.put('/updateMenu/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
-    const { categoryName, url, isHidden, createdDate } = req.body;
+    const { menuName, url, isHidden, createdDate, routeName } = req.body;
   
-    if (!categoryName && !url && isHidden === undefined || !createdDate) {
+    if (!menuName && !url && isHidden === undefined || !createdDate || !routeName) {
         return res.status(400).json({ message: "Please provide data to update." });
     }
   
     try {
-        const updatedCategory = await FoodCategory.findByIdAndUpdate(
+        const updatedMenu = await FoodMenu.findByIdAndUpdate(
             id,
-            { $set: { categoryName, url, isHidden, createdDate } },
+            { $set: { menuName, url, isHidden, createdDate, routeName } },
             { new: true, runValidators: true } 
         );
   
-        if (!updatedCategory) {
-            return res.status(404).json({ message: "Category not found" });
+        if (!updatedMenu) {
+            return res.status(404).json({ message: "Menu not found" });
         }
   
         res.status(200).json({
-            message: "Category updated successfully",
-            category: updatedCategory
+            message: "Menu updated successfully",
+            menu: updatedMenu
         });
     } catch (error) {
-        console.error('Error updating category:', error);
-        res.status(500).json({ message: "Error updating category", error: error.message });
+        console.error('Error updating menu:', error);
+        res.status(500).json({ message: "Error updating menu", error: error.message });
     }
   });
   
@@ -199,11 +202,11 @@ router.get('/getAllCategories', async (req, res) => {
    * tags: 
    *  name: Foods
    *  description: Foods management API
-   * /api/foodCategories/deleteCategory/{id}:
+   * /api/foodMenus/deleteMenu/{id}:
    *  delete:
-   *    summary: This api is delete category 
-   *    description:  This api is used to delete category
-   *    tags: [Categories]
+   *    summary: This api is delete Menu 
+   *    description:  This api is used to delete Menu
+   *    tags: [Menus]
    *    parameters: 
    *      - in: path
    *        name: id
@@ -215,17 +218,17 @@ router.get('/getAllCategories', async (req, res) => {
    *      200: 
    *        description: deleted
    */
-  router.delete('/deleteCategory/:id', isLoggedIn, async (req, res) => {
+  router.delete('/deleteMenu/:id', isLoggedIn, async (req, res) => {
     try {
       const {id} = req.params;
-      const deletedCategory = await FoodCategory.findByIdAndDelete(id, {new: true});
+      const deletedMenu = await FoodMenu.findByIdAndDelete(id, {new: true});
       res.status(200).json({
-        message: "Category deleted successfully",
-        category: deletedCategory
+        message: "Menu deleted successfully",
+        menu: deletedMenu
       })
     } catch (error) {
       console.log(error);
-      res.status(500).json({message: "Error deleting category", error: error.message})
+      res.status(500).json({message: "Error deleting Menu", error: error.message})
     }
   })
 

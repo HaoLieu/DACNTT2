@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
-const foodCategorySchema = new mongoose.Schema({
-    categoryName: {
+const foodMenuSchema = new mongoose.Schema({
+    menuName: {
         type: String,
         required: true
     },
@@ -16,10 +16,14 @@ const foodCategorySchema = new mongoose.Schema({
     createdDate: {
         type: String,
         requrired: true
+    },
+    routeName: {
+        type: String,
+        requrired: true
     }
 }, {
-    collection: 'foodCategories'
+    collection: 'foodMenus'
 })
 
-const FoodCategory = mongoose.model('FoodCategory', foodCategorySchema);
-module.exports = FoodCategory;
+const FoodMenu = mongoose.model('FoodMenu', foodMenuSchema);
+module.exports = FoodMenu;
