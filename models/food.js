@@ -13,10 +13,6 @@ const foodSchema = new mongoose.Schema({
     url: String,
     filename: String
   },
-  qty: {
-    type: Number,
-    required: true
-  },
   isHidden: {
     type: Boolean,
     required: true
