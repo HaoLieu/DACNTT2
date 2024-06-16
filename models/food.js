@@ -10,8 +10,8 @@ const foodSchema = new mongoose.Schema({
     required: true
   },
   img: {
-    url: String,
-    filename: String
+    type: String,
+    required: true
   },
   isHidden: {
     type: Boolean,
@@ -20,6 +20,10 @@ const foodSchema = new mongoose.Schema({
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'FoodCategory',
+    required: true
+  },
+  createdDate: {
+    type: String,
     required: true
   }
 }, {

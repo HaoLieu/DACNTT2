@@ -24,10 +24,11 @@ const upload = multer ({storage});
  *             type: integer
  *          img:
  *             type: string
- *             format: binary
  *          isHidden: 
  *             type: boolean
  *          category:
+ *            type: string
+ *          createdDate:
  *            type: string
  */
 
@@ -111,7 +112,7 @@ router.get('/getAllFoods', async (req, res) => {
    *    requestBody: 
    *      required: true
    *      content: 
-   *        multipart/form-data:
+   *        application/json:
    *          schema: 
    *            $ref: '#components/schema/Food'
    *            required:
@@ -120,13 +121,14 @@ router.get('/getAllFoods', async (req, res) => {
  *              - isHidden
  *              - category
  *              - img
+ *              - createdDate
    *    responses: 
    *      200: 
    *        description: Success 
    */
-  router.post('/createFood',   upload.single('img'), async (req, res) => {
-    const { name, price, isHidden, category } = req.body; // Removed `img` from destructuring
-    if (!name || price === undefined || isHidden === undefined || !category || !req.file) {
+  router.post('/createFood', async (req, res) => {
+    const { name, price, img, isHidden, category, createdDate, } = req.body; // Removed `img` from destructuring
+    if (!name || price === undefined || isHidden === undefined || !category || !createdDate || !img) {
         return res.status(400).json({ message: "All fields are required, including the image and category ID." });
     }
   
@@ -136,8 +138,15 @@ router.get('/getAllFoods', async (req, res) => {
             return res.status(404).json({ message: "Category not found. Please provide a valid category ID." });
         }
   
-        const newFood = new Food(req.body);
-        newFood.img = {url: req.file.path, filename: req.file.filename};
+        const newFood = new Food({
+          name,
+          price,
+          img,
+          isHidden,
+          category,
+          createdDate
+        });
+        
   
         await newFood.save();
   
@@ -185,42 +194,41 @@ router.get('/getAllFoods', async (req, res) => {
    *              items: 
    *                $ref: '#components/schema/Food'
    */
-  router.put('/updateFood/:id',  upload.single('img'), async (req, res) => {
+  router.put('/updateFood/:id', upload.single('img'), async (req, res) => {
     const { id } = req.params;
-    const updates = req.body;
-  
-    if (Object.keys(updates).length === 0 && !req.file) {
-        return res.status(400).json({ message: "Please provide data to update." });
+    const { name, price, isHidden, category, createdDate, img } = req.body;
+
+    if (!name || price === undefined || isHidden === undefined || !category || !createdDate || !img) {
+        return res.status(400).json({ message: "All fields are required, including the image and category ID." });
     }
-  
-    // Add file details to the update if an image has been uploaded
-    if (req.file) {
-        updates.img = {
-            url: req.file.path,
-            filename: req.file.filename
-        };
-    }
-  
+
     try {
-        const updatedFood = await Food.findByIdAndUpdate(
-            id,
-            { $set: updates },
-            { new: true, runValidators: true }
-        );
-  
-        if (!updatedFood) {
-            return res.status(404).json({ message: "Food item not found" });
+        // Check if the specified category exists
+        const categoryExists = await FoodCategory.findById(category);
+        if (!categoryExists) {
+            return res.status(404).json({ message: "Category not found. Please provide a valid category ID." });
         }
+
+        // Find the food by ID and update it with new data
+        const updatedFood = await Food.findByIdAndUpdate(
+            id, 
+            { $set: { name, price, img, isHidden, category, createdDate}}, 
+            { new: true, runValidators: true }
+          );  // Option {new: true} ensures that the method returns the updated document
+
+        if (!updatedFood) {
+            return res.status(404).json({ message: "Food not found. Unable to update non-existent food." });
+        }
+
         res.status(200).json({
             message: "Food updated successfully",
             food: updatedFood
         });
     } catch (error) {
-        console.error('Error updating food:', error);
-        res.status(500).json({ message: "Error updating food", error: error.message });
+        console.error('Failed to update food:', error);
+        res.status(500).json({ message: "Failed to update food", error: error.message });
     }
-  });
-  
+});
   
   /**
    * @swagger

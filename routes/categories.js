@@ -48,7 +48,7 @@ router.get('/getAllCategories', async (req, res) => {
     } catch (error) {
       console.log(error);
     }
-  })
+})
   
   /**
    * @swagger
