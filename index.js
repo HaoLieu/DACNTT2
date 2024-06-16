@@ -10,6 +10,7 @@ const {storage} = require('./cloudinary');
 const passport = require('passport');
 const LocalStratey = require('passport-local');
 const session = require('express-session');
+const mongodbStore = require('connect-mongo')(session);
 const upload = multer ({storage});
 const User = require('./models/user');
 const foodRoutes = require('./routes/food');
@@ -40,7 +41,18 @@ app.use(cors({
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
+const store = new mongodbStore({
+  url: mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall",
+  secret: 'thisisarandomnormalsecret',
+  touchAfter: 24 * 3600
+})
+
+store.on("error", (e) => {
+  console.log("Session error: ", e);
+})
+
 const sessionConfig = {
+  store,
   secret: 'thisisarandomnormalsecret',
   resave: false,
   saveUninitialized: true,
