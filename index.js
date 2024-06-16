@@ -116,7 +116,7 @@ const options = {
       }
     ]
   },
-  apis: ['./index.js', './routes/food.js']
+  apis: ['./index.js', './routes/food.js', './routes/categories.js']
 }
 
 const swaggerSpecs = swaggerJsdoc(options);
