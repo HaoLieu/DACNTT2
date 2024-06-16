@@ -20,8 +20,16 @@ mongoose.connect(mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall")
   })
   .catch(error => console.log(error))
 
+const allowedOrigins = ['https://dacntt2.onrender.com', 'http://localhost:8080'];
+
 app.use(cors({
-  origin: 'https://dacntt2.onrender.com/' // Adjust this to match the domain of your client application
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
 }));
 
 app.use(express.urlencoded({extended: true}));
