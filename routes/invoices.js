@@ -74,14 +74,20 @@ const Invoice = require('../models/invoice');
  *         description: Error retrieving invoices.
  */
 router.get('/getAllInvoices', async (req, res) => {
-    try {
-      const invoices = await Invoice.find();  // Fetch all invoices from the database
-      res.json(invoices);  // Send the invoices as a JSON response
-    } catch (error) {
-      console.error(error);  // Log any errors to the console
-      res.status(500).json({ message: "Error retrieving invoices" });
-    }
+  try {
+    // Fetch all invoices and populate the 'food' field to get details from the Food collection
+    const invoices = await Invoice.find().populate({
+      path: 'items.food',  // Path to the food in each item
+      select: 'name'  // Only retrieve the 'name' field of the food
+    });
+    res.json(invoices);  // Send the invoices with food names as a JSON response
+  } catch (error) {
+    console.error(error);  // Log any errors to the console
+    res.status(500).json({ message: "Error retrieving invoices" });
+  }
 });
+
+
 
 /**
  * @swagger
@@ -115,7 +121,10 @@ router.get('/getAllInvoices', async (req, res) => {
 router.get('/getInvoiceById/:id', async (req, res) => {
     try {
       const { id } = req.params;  
-      const invoice = await Invoice.findById(id);  
+      const invoice = await Invoice.findById(id).populate({
+        path: 'items.food',  // Path to the food in each item
+        select: 'name'  // Only retrieve the 'name' field of the food
+      });  
       if (!invoice) {
         return res.status(404).json({ message: "Invoice not found" });
       }

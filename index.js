@@ -18,6 +18,8 @@ const userRoutes = require('./routes/users');
 const menuRoutes = require('./routes/menus');
 const invoiceRoutes = require('./routes/invoices');
 const MongoStore = require('connect-mongo');
+const roleRoutes = require('./routes/roles');
+const employeeRoutes = require('./routes/employees');
 
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI ? mongoURI : "mongodb://127.0.0.2:27017/Foodstall")
@@ -81,6 +83,8 @@ app.use("/api/foods", foodRoutes);
 app.use("/api/foodCategories", categoriesRoutes);
 app.use("/api/foodMenus", menuRoutes);
 app.use("/api/invoice", invoiceRoutes);
+app.use("/api/roles", roleRoutes);
+app.use("/api/employees", employeeRoutes);
 
 
 // Upload
@@ -166,7 +170,7 @@ const options = {
       }
     ]
   },
-  apis: ['./index.js', './routes/food.js', './routes/categories.js', './routes/users.js', './routes/menus.js', './routes/invoices.js']
+  apis: ['./index.js', './routes/food.js', './routes/categories.js', './routes/users.js', './routes/menus.js', './routes/invoices.js', './routes/employees.js', './routes/roles.js']
 }
 
 const swaggerSpecs = swaggerJsdoc(options);
