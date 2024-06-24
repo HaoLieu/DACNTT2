@@ -9,12 +9,12 @@ const Invoice = require('../models/invoice');
  *     InvoiceItem:
  *       type: object
  *       required:
- *         - food
+ *         - name
  *         - quantity
  *         - price
  *         - sum
  *       properties:
- *         food:
+ *         name:
  *           type: string
  *         quantity:
  *           type: number
@@ -76,10 +76,7 @@ const Invoice = require('../models/invoice');
 router.get('/getAllInvoices', async (req, res) => {
   try {
     // Fetch all invoices and populate the 'food' field to get details from the Food collection
-    const invoices = await Invoice.find().populate({
-      path: 'items.food',  // Path to the food in each item
-      select: 'name'  // Only retrieve the 'name' field of the food
-    });
+    const invoices = await Invoice.find()
     res.json(invoices);  // Send the invoices with food names as a JSON response
   } catch (error) {
     console.error(error);  // Log any errors to the console
@@ -121,10 +118,7 @@ router.get('/getAllInvoices', async (req, res) => {
 router.get('/getInvoiceById/:id', async (req, res) => {
     try {
       const { id } = req.params;  
-      const invoice = await Invoice.findById(id).populate({
-        path: 'items.food',  // Path to the food in each item
-        select: 'name'  // Only retrieve the 'name' field of the food
-      });  
+      const invoice = await Invoice.findById({_id: id})
       if (!invoice) {
         return res.status(404).json({ message: "Invoice not found" });
       }
@@ -221,7 +215,6 @@ router.put('/updateInvoiceDateTime/:id', async (req, res) => {
     const { id } = req.params; 
     console.log(req.body);
     const { date, time } = req.body; 
-    console.log("date: " + date + "   time: " + time);
     try {
       const updatedInvoice = await Invoice.findByIdAndUpdate(
         id,
