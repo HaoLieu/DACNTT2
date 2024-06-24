@@ -23,7 +23,7 @@ const Role = require('../models/role');
  *           description: List of permissions associated with the role
  *       example:
  *         name: Admin
- *         permissions: ["create-user", "delete-user"]
+ *         permissions: [user: ["create-user", "read-user", "update-user", "delete-user"], food: ["create-food", "read-food", "update-food", "delete-food"], foodCategory: ["create-foodCategory", "read-foodCategory", "update-foodCategory", "delete-foodCategory"], foodMenu: ["create-foodMenu", "read-foodMenu", "update-foodMenu", "delete-foodMenu"], invoice: ["create-invoice", "read-invoice", "update-invoice", "delete-invoice"], employee: ["create-employee", "read-employee", "update-employee", "delete-employee"], role: ["create-role", "read-role", "update-role", "delete-role"]]
  */
 
 // Create a new role
